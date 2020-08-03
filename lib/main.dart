@@ -1,86 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_calc/drawer.dart';
+import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
 
-void main() {
-  runApp(MaterialApp(home: Stack()));
-}
 
-class Stack extends StatefulWidget {
+void main() => runApp(MaterialApp(home: HomeScreen(), debugShowCheckedModeBanner: false,));
+
+class MyApp extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _Stack();
+    return _MyApp();
   }
 }
-
-class _Stack extends State<Stack> {
-  TextEditingController _stackController= new TextEditingController();
-
-  List<int> stack = new List<int>();
+class _MyApp extends State<MyApp>{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("Stack Demo"),
+        title: Text('SimpleCalculator'),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "Enter a number to push into the stack:",
-              textAlign: TextAlign.center,),
-            TextFormField(
-              controller: _stackController,
-            ),
-            Padding(padding: EdgeInsets.all(10),),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                    child: Text("Push"),
-                    onPressed: (){
-                      stack.add(int.parse(_stackController.text));
-                      print(stack.toString());
-                      setState(() {
-
-                      });
-                    }),
-                Padding(padding: EdgeInsets.all(10),),
-                RaisedButton(
-                    child: Text("Pop"),
-                    onPressed: (){
-                      try { stack.removeLast();}
-                      on RangeError catch (e) {
-                        print("Underflow detected!");
-                      }
-                      print(stack.toString());
-                      setState(() {
-
-                      });
-                    }),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(10),),
-            Text(
-              "Elements in the stack are:",
-              textAlign: TextAlign.center,
-            ),
-            Column(
-              children: returnStackElements(),
-            ),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: CalcButton(),
         ),
       ),
     );
   }
-  List<Widget> returnStackElements(){
-    List<Widget> elementsToReturn =[];
-    stack.forEach((element) {
-      elementsToReturn.add(Text(element.toString()));
-    });
-    return elementsToReturn;
+}
 
+class CalcButton extends StatefulWidget {
+  @override
+  _CalcButtonState createState() => _CalcButtonState();
+}
+
+class _CalcButtonState extends State<CalcButton> {
+  double _currentValue = 0;
+  @override
+  Widget build(BuildContext context) {
+    var calc = SimpleCalculator(
+      value: _currentValue,
+      hideExpression: false,
+      hideSurroundingBorder: true,
+      onChanged: (key, value, expression) {
+        setState(() {
+          _currentValue = value;
+        });
+        print("$key\t$value\t$expression");
+      },
+      theme: const CalculatorThemeData(
+        borderColor: Colors.black,
+        borderWidth: 2,
+        displayColor: Colors.white38,
+        displayStyle: const TextStyle(fontSize: 80, color: Colors.black),
+        expressionColor: Colors.black,
+        expressionStyle: const TextStyle(fontSize: 20, color: Colors.white),
+        operatorColor: Colors.lightBlue,
+        operatorStyle: const TextStyle(fontSize: 30, color: Colors.white),
+        commandColor: Colors.white12,
+        commandStyle: const TextStyle(fontSize: 30, color: Colors.white),
+        numColor: Colors.blueGrey,
+        numStyle: const TextStyle(fontSize: 50, color: Colors.white),
+      ),
+    );
+    return OutlineButton(
+      child: Text(_currentValue.toString()),
+      onPressed: () {
+        showModalBottomSheet(
+            isScrollControlled: true,
+            context: context,
+            builder: (BuildContext context) {
+              return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  child: calc);
+            });
+      },
+    );
   }
 }
